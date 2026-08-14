@@ -1,12 +1,8 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../../models/User';
+import { AuthError } from '../../errors/AuthError';
 
-export class AuthError extends Error {
-  constructor(message: string, public statusCode: number) {
-    super(message);
-  }
-}
 
 export const signup = async (email: string, password: string) => {
   const existing = await User.findOne({ email });
