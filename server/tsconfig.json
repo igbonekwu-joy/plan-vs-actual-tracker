@@ -35,14 +35,14 @@
     // Recommended Options
     // "strict": true,
     "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     // "skipLibCheck": true,
 
     "target": "ES2022",
-    "module": "ESNext",
+    "module": "CommonJS",
     "outDir": "dist",
     "rootDir": "src",
     "strict": true,
