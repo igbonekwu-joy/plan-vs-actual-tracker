@@ -17,7 +17,13 @@ describe('POST /api/auth/login', () => {
       .post('/api/auth/login')
       .send({ email: 'joy@example.com', password: 'password123' });
     expect(res.status).toBe(200);
-    expect(res.body.access_token).toBeDefined();
+    expect(res.body.message).toBe('Login successful');
+    expect(res.headers['set-cookie']).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining('access_token='),
+        expect.stringContaining('refresh_token='),
+      ])
+    );
   });
 
   it('returns 401 for wrong password', async () => {

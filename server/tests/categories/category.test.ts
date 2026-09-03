@@ -9,7 +9,10 @@ afterAll(closeTestDb);
 const signupAndLogin = async () => {
   await request(app).post('/api/auth/signup').send({ email: 'joy@example.com', password: 'password123' });
   const res = await request(app).post('/api/auth/login').send({ email: 'joy@example.com', password: 'password123' });
-  return res.body.access_token;
+  const setCookieHeader = res.headers['set-cookie'];
+  const accessCookie = (Array.isArray(setCookieHeader) ? setCookieHeader : [])
+    .find((cookie) => cookie.startsWith('access_token='));
+  return accessCookie?.split(';')[0].replace('access_token=', '');
 };
 
 describe('POST /api/categories', () => {
@@ -46,7 +49,10 @@ describe('GET /api/categories', () => {
     // second user
     await request(app).post('/api/auth/signup').send({ email: 'other@example.com', password: 'password123' });
     const loginB = await request(app).post('/api/auth/login').send({ email: 'other@example.com', password: 'password123' });
-    const tokenB = loginB.body.access_token;
+    const setCookieHeader = loginB.headers['set-cookie'];
+    const accessCookie = (Array.isArray(setCookieHeader) ? setCookieHeader : [])
+      .find((cookie) => cookie.startsWith('access_token='));
+    const tokenB = accessCookie?.split(';')[0].replace('access_token=', '');
     await request(app).post('/api/categories').set('Authorization', `Bearer ${tokenB}`).send({ name: 'Payroll' });
 
     const res = await request(app).get('/api/categories').set('Authorization', `Bearer ${tokenA}`);
