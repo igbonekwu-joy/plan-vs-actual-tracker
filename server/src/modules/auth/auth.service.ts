@@ -22,10 +22,10 @@ export const login = async (email: string, password: string) => {
   const valid = await bcrypt.compare(password, user.password);
   if (!valid) throw new HttpError('Invalid credentials', 401);
 
-  const access_token = generateAccessToken({ id: user._id.toString(), username: user.email, role: user.role, is_active: user.is_active });
-  const refresh_token = await generateRefreshToken(user._id);
+  const accessToken = generateAccessToken({ id: user._id.toString(), username: user.email, role: user.role, is_active: user.is_active });
+  const refreshToken = await generateRefreshToken(user._id);
 
-  return { user, access_token, refresh_token };
+  return { user, accessToken, refreshToken };
 };
 
 export const refresh = async (token: string) => {
