@@ -1,4 +1,9 @@
 export const SUCCESS = {
+  auth: {
+    signup: 'Signup successful',
+    login: 'Login successful',
+    tokenRefreshed: 'Token refreshed successfully',
+  },
   category: {
     created: 'Category created successfully',
   },

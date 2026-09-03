@@ -13,7 +13,7 @@ describe('POST /api/auth/signup', () => {
       .send({ email: 'joy@example.com', password: 'password123' });
 
     expect(res.status).toBe(201);
-    expect(res.body.email).toBe('joy@example.com');
+    expect(res.body.message).toBe('Signup successful');
     expect(res.body.password).toBeUndefined();
   });
 
