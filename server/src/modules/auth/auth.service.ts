@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { User } from '../../models/User';
 import { AuthError } from '../../errors/AuthError';
+import { env } from '../../config/env';
 
 
 export const signup = async (email: string, password: string) => {
@@ -22,8 +23,8 @@ export const login = async (email: string, password: string) => {
 
   const token = jwt.sign(
     { userId: user._id },
-    process.env.JWT_SECRET || 'test-secret',
-    { expiresIn: '1d' }
+    env().JWT_SECRET || 'test-secret',
+    { expiresIn: env().JWT_EXPIRES_IN }
   );
   return { user, token };
 };
