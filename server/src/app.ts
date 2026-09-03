@@ -7,9 +7,9 @@ import { errorHandler } from './middleware/errorHandler';
 const app: Application = express();
 app.use(express.json());
 app.use('/api/auth', authRoutes);
-// app.get('/api/protected', authGuard, (req, res) => {
-// 	res.status(200).json({ userId: req.userId });
-// });
+app.get('/api/protected', authGuard, (req, res) => {
+	res.status(200).json({ userId: req.userId });
+});
 app.use(errorHandler);
 
 export default app;

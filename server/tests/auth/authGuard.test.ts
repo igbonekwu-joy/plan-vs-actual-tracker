@@ -9,7 +9,7 @@ afterAll(closeTestDb);
 const signupAndLogin = async () => {
   await request(app).post('/api/auth/signup').send({ email: 'joy@example.com', password: 'password123' });
   const res = await request(app).post('/api/auth/login').send({ email: 'joy@example.com', password: 'password123' });
-  return res.body.token;
+  return res.body.access_token;
 };
 
 describe('authGuard middleware', () => {

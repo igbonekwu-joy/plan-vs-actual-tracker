@@ -17,7 +17,7 @@ describe('POST /api/auth/login', () => {
       .post('/api/auth/login')
       .send({ email: 'joy@example.com', password: 'password123' });
     expect(res.status).toBe(200);
-    expect(res.body.token).toBeDefined();
+    expect(res.body.access_token).toBeDefined();
   });
 
   it('returns 401 for wrong password', async () => {

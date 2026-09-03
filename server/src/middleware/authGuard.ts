@@ -17,13 +17,13 @@ export const authGuard = (req: Request, res: Response, next: NextFunction) => {
     if (
       typeof decoded !== 'object' ||
       decoded === null ||
-      !('userId' in decoded) ||
-      typeof decoded.userId !== 'string'
+      !('id' in decoded) ||
+      typeof decoded.id !== 'string'
     ) {
       return next(new AuthError('Invalid or expired token', 401));
     }
 
-    req.userId = decoded.userId;
+    req.userId = decoded.id;
     next();
   } catch {
     return next(new AuthError('Invalid or expired token', 401));

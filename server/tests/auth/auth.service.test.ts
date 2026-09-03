@@ -1,6 +1,6 @@
 import { connectTestDb, clearTestDb, closeTestDb } from '../setup/testDb';
 import * as authService from '../../src/modules/auth/auth.service';
-import { AuthError } from '../../src/modules/auth/auth.service';
+import { AuthError } from '../../src/errors/AuthError';
 
 beforeAll(connectTestDb);
 afterEach(clearTestDb);
@@ -23,8 +23,8 @@ describe('authService.signup', () => {
 describe('authService.login', () => {
   it('returns a token for correct credentials', async () => {
     await authService.signup('joy@example.com', 'password123');
-    const { token } = await authService.login('joy@example.com', 'password123');
-    expect(typeof token).toBe('string');
+    const { access_token } = await authService.login('joy@example.com', 'password123');
+    expect(typeof access_token).toBe('string');
   });
 
   it('rejects wrong password', async () => {
