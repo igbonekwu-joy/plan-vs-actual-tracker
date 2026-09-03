@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import * as authService from './auth.service';
 import { env } from '../../config/env';
 import { SUCCESS } from '../../constants/messages';
+import { StatusCodes } from 'http-status-codes';
 
 const setAuthCookies = (res: Response, accessToken: string, refreshToken: string) => {
   const secure = env().NODE_ENV === 'production';
@@ -24,10 +25,10 @@ export const signupHandler = async (req: Request, res: Response, next: NextFunct
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+      return res.status(StatusCodes.BAD_REQUEST).json({ error: 'Email and password are required' });
     }
     await authService.signup(email, password);
-    res.status(201).json({ message: SUCCESS.auth.signup });
+    res.status(StatusCodes.CREATED).json({ message: SUCCESS.auth.signup });
   } catch (err) {
     next(err);
   }
@@ -38,7 +39,7 @@ export const loginHandler = async (req: Request, res: Response, next: NextFuncti
     const { email, password } = req.body;
     const { accessToken, refreshToken } = await authService.login(email, password);
     setAuthCookies(res, accessToken, refreshToken);
-    res.status(200).json({ message: SUCCESS.auth.login });
+    res.status(StatusCodes.OK).json({ message: SUCCESS.auth.login });
   } catch (err) {
     next(err);
   }
@@ -49,12 +50,12 @@ export const refreshTokenHandler = async (req: Request, res: Response, next: Nex
     const { token } = req.body;
 
     if (!token) {
-      return res.status(400).json({ error: 'Refresh Token is required' });
+      return res.status(StatusCodes.BAD_REQUEST).json({ error: 'Refresh Token is required' });
     } 
 
     const { accessToken, refreshToken } = await authService.refresh(token);
     setAuthCookies(res, accessToken, refreshToken);
-    return res.status(200).json({ message: SUCCESS.auth.tokenRefreshed });
+    return res.status(StatusCodes.OK).json({ message: SUCCESS.auth.tokenRefreshed });
   } catch (err) {
     next(err);
   }

@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import { generateCSRFToken } from "../utils/tokens";
 import { env } from "../config/env";
+import { StatusCodes } from "http-status-codes";
 
 export const attachCSRF = (req: Request, res: Response, next: NextFunction) => {
     const csrfToken = req.cookies?.csrf_token || generateCSRFToken();
@@ -30,14 +31,14 @@ export const csrf = (req: Request, res: Response, next: NextFunction) => {
     const tokenFromHeader = req.headers["x-csrf-token"];
 
     if (!tokenFromCookie || !tokenFromHeader) {
-        return res.status(403).json({
+        return res.status(StatusCodes.FORBIDDEN).json({
             status: "error",
             message: "Missing CSRF token"
         });
     }
 
     if (tokenFromCookie !== tokenFromHeader) {
-        return res.status(403).json({
+        return res.status(StatusCodes.FORBIDDEN).json({
             status: "error",
             message: "Invalid CSRF token"
         });
