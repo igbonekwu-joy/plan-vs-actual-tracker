@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as planService from './plan.service';
 import { StatusCodes } from 'http-status-codes';
+import { SUCCESS } from '../../constants/messages';
 
 export const upsertPlanHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -13,8 +14,8 @@ export const upsertPlanHandler = async (req: Request, res: Response, next: NextF
       return res.status(StatusCodes.BAD_REQUEST).json({ error: 'targetAmount must be a non-negative number' });
     }
 
-    const plan = await planService.createOrUpdatePlan(req.userId!, categoryId, month, targetAmount);
-    res.status(StatusCodes.CREATED).json({ status: 'success', message: 'Plan upserted successfully' });
+    await planService.createOrUpdatePlan(req.userId!, categoryId, month, targetAmount);
+    res.status(StatusCodes.OK).json({ status: 'success', message: SUCCESS.plan.upserted });
   } catch (err) {
     next(err);
   }
