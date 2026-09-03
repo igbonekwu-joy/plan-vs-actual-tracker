@@ -1,16 +1,22 @@
 import type { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { env } from '../config/env';
-import { AuthError } from '../errors/AuthError';
+import { HttpError } from '../errors/HttpError';
 
 export const authGuard = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return next(new AuthError('No token provided', 401));
+  if (authHeader && !authHeader.startsWith('Bearer ')) {
+    return next(new HttpError('Unauthenticated', 401));
   }
 
-  const token = authHeader.slice('Bearer '.length);
+  const token = authHeader
+    ? authHeader.slice('Bearer '.length)
+    : req.cookies?.access_token;
+
+  if (!token) {
+    return next(new HttpError('Unauthenticated', 401));
+  }
 
   try {
     const decoded = jwt.verify(token, env().JWT_SECRET);
@@ -20,12 +26,12 @@ export const authGuard = (req: Request, res: Response, next: NextFunction) => {
       !('id' in decoded) ||
       typeof decoded.id !== 'string'
     ) {
-      return next(new AuthError('Invalid or expired token', 401));
+      return next(new HttpError('Invalid or expired token', 401));
     }
 
     req.userId = decoded.id;
     next();
   } catch {
-    return next(new AuthError('Invalid or expired token', 401));
+    return next(new HttpError('Invalid or expired token', 401));
   }
 };

@@ -1,6 +1,6 @@
 import { connectTestDb, clearTestDb, closeTestDb } from '../setup/testDb';
 import * as authService from '../../src/modules/auth/auth.service';
-import { AuthError } from '../../src/errors/AuthError';
+import { HttpError } from '../../src/errors/HttpError';
 
 beforeAll(connectTestDb);
 afterEach(clearTestDb);
@@ -16,7 +16,7 @@ describe('authService.signup', () => {
   it('rejects duplicate emails', async () => {
     await authService.signup('joy@example.com', 'password123');
     await expect(authService.signup('joy@example.com', 'otherpass'))
-      .rejects.toThrow(AuthError);
+      .rejects.toThrow(HttpError);
   });
 });
 
@@ -30,11 +30,11 @@ describe('authService.login', () => {
   it('rejects wrong password', async () => {
     await authService.signup('joy@example.com', 'password123');
     await expect(authService.login('joy@example.com', 'wrongpass'))
-      .rejects.toThrow(AuthError);
+      .rejects.toThrow(HttpError);
   });
 
   it('rejects unknown email', async () => {
     await expect(authService.login('nobody@example.com', 'password123'))
-      .rejects.toThrow(AuthError);
+      .rejects.toThrow(HttpError);
   });
 });
