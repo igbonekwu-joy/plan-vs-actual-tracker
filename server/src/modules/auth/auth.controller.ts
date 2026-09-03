@@ -36,8 +36,8 @@ export const signupHandler = async (req: Request, res: Response, next: NextFunct
 export const loginHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
-    const { access_token, refresh_token } = await authService.login(email, password);
-    setAuthCookies(res, access_token, refresh_token);
+    const { accessToken, refreshToken } = await authService.login(email, password);
+    setAuthCookies(res, accessToken, refreshToken);
     res.status(200).json({ message: SUCCESS.auth.login });
   } catch (err) {
     next(err);
