@@ -13,7 +13,7 @@ export const upsertPlanHandler = async (req: Request, res: Response, next: NextF
     }
 
     const plan = await planService.createOrUpdatePlan(req.userId!, categoryId, month, targetAmount);
-    res.status(200).json(plan);
+    res.status(200).json({ status: 'success', message: 'Plan upserted successfully' });
   } catch (err) {
     next(err);
   }

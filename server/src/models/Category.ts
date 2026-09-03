@@ -7,9 +7,21 @@ export interface ICategory extends Document {
 }
 
 const categorySchema = new Schema<ICategory>({
-  name: { type: String, required: true, trim: true },
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-}, { timestamps: true });
+    name: { type: String, required: true, trim: true },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  }, 
+  {
+    timestamps: true,
+    versionKey: false, 
+    toJSON: {
+      transform(_doc: unknown, rec: Record<string, unknown>) {
+        rec.id = rec._id; 
+        delete rec._id; 
+        return rec; 
+      }
+    }
+  }
+);
 
 categorySchema.index({ userId: 1, name: 1 }, { unique: true });
 
