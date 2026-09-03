@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { User } from '../../models/User';
 import { AuthError } from '../../errors/AuthError';
 import { env } from '../../config/env';
-import { generateAccessToken, generateRefreshToken } from '../../utils/tokens';
+import { generateAccessToken, generateRefreshToken, regenerateRefreshToken } from '../../utils/tokens';
 
 
 export const signup = async (email: string, password: string) => {
@@ -29,5 +29,8 @@ export const login = async (email: string, password: string) => {
 };
 
 export const refresh = async (token: string) => {
+  const regenerated = await regenerateRefreshToken(token);
+  if (!regenerated) throw new AuthError('Invalid or expired refresh token', 401);
 
-}
+  return regenerated;
+};

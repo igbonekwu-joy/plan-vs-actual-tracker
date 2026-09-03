@@ -29,12 +29,12 @@ export const refreshTokenHandler = async (req: Request, res: Response, next: Nex
     const { token } = req.body;
 
     if (!token) {
-      return res.status(400).json({ error: 'Access Token is required' });
+      return res.status(400).json({ error: 'Refresh Token is required' });
     } 
 
-    // const { token: newToken } = await authService.refresh(token);
-    // res.status(200).json({ token: newToken });
+    const { accessToken, refreshToken } = await authService.refresh(token);
+    return res.status(200).json({ token: accessToken, refresh_token: refreshToken });
   } catch (err) {
     next(err);
   }
-}
+};
