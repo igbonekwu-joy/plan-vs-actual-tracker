@@ -127,6 +127,28 @@ Granularity: **month** (documented choice. Quarter was the alternative but month
 
 A lock is a document keyed on `userId + month` in the `Lock` collection; its existence is the lock state (no separate boolean flag). Enforcement happens **server-side** in the service layer, not just hidden in the UI: `PUT /api/plans`, `POST /api/actuals`, and `POST /api/actuals/import` all check lock status before writing and reject with `423 Locked` if the target month is locked. CSV import checks every unique month present in the batch in a single query before inserting anything, so a locked month anywhere in the file blocks the whole import.
 
+## Report
+
+`GET /api/report?startMonth=YYYY-MM&endMonth=YYYY-MM` returns a `{ rows, chart }` payload.
+
+Each row represents one category+month combination and includes only category+month
+pairs where a plan or an actual exists — not every category for every month in range.
+
+**Edge case handling:**
+- **Missing actual** (no actual entries logged for that category+month): `actual`,
+  `variance`, and `variancePercent` are all returned as the string `"-"`.
+- **Plan = 0**: `variancePercent` is returned as `"-"` (division by zero avoided).
+  `variance` itself is still a real number (`actual - 0`), since that's meaningful
+  even when no target was set.
+- **Missing plan document**: defaults to `0`, functionally identical to an
+  explicitly-set `$0` target — this keeps missing-plan and zero-plan handled by
+  the same code path rather than introducing a third edge case.
+
+**Chart**: `chart.data` is monthly net variance (sum of variance across all
+categories for each month in range). Rows with a missing actual contribute `0`
+to this sum rather than being skipped, so every month in the requested range
+still appears on the chart even if nothing was logged.
+
 ## Data Modeling & Indexing Notes
 
 - `Category`: unique compound index on `(userId, name)` — prevents duplicate categories per user and supports fast category lookups during CSV import.
