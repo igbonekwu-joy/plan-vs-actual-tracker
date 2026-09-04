@@ -1,7 +1,7 @@
 import { useEffect, useState, FormEvent, ChangeEvent, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { apiRequest, ApiError } from '../api/client';
-import { Category, Actual, categoryName } from '../api/types';
+import { Category, Actual, PaginatedResponse, Pagination, categoryName } from '../api/types';
 
 const currentMonth = () => new Date().toISOString().slice(0, 7);
 
@@ -9,6 +9,9 @@ export default function ActualsPage() {
   const { token } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [actuals, setActuals] = useState<Actual[]>([]);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   const [categoryId, setCategoryId] = useState('');
   const [month, setMonth] = useState(currentMonth());
   const [amount, setAmount] = useState('');
@@ -31,11 +34,12 @@ export default function ActualsPage() {
   const loadActuals = async () => {
     setLoading(true);
     try {
-      const data = await apiRequest<Actual[]>(
-        `/actuals?startMonth=${rangeStart}&endMonth=${rangeEnd}`,
+      const data = await apiRequest<PaginatedResponse<Actual>>(
+        `/actuals?startMonth=${rangeStart}&endMonth=${rangeEnd}&page=${page}&pageSize=${pageSize}`,
         { token },
       );
-      setActuals(data);
+      setActuals(data.items);
+      setPagination(data.pagination);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not load actuals.');
     } finally {
@@ -44,7 +48,8 @@ export default function ActualsPage() {
   };
 
   useEffect(() => { loadCategories(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { loadActuals(); }, [rangeStart, rangeEnd]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setPage(1); }, [rangeStart, rangeEnd]);
+  useEffect(() => { loadActuals(); }, [rangeStart, rangeEnd, page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -181,21 +186,36 @@ export default function ActualsPage() {
         ) : actuals.length === 0 ? (
           <p className="empty-state">No entries logged for this range yet.</p>
         ) : (
-          <table>
-            <thead>
-              <tr><th>Month</th><th>Category</th><th>Note</th><th style={{ textAlign: 'right' }}>Amount</th></tr>
-            </thead>
-            <tbody>
-              {actuals.map((a) => (
-                <tr key={a._id}>
-                  <td className="mono">{a.month}</td>
-                  <td>{categoryName(a.categoryId)}</td>
-                  <td style={{ color: 'var(--ink-soft)' }}>{a.note || '—'}</td>
-                  <td className="num">{a.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <>
+            <table>
+              <thead>
+                <tr><th>Month</th><th>Category</th><th>Note</th><th style={{ textAlign: 'right' }}>Amount</th></tr>
+              </thead>
+              <tbody>
+                {actuals.map((a) => (
+                  <tr key={a._id}>
+                    <td className="mono">{a.month}</td>
+                    <td>{categoryName(a.categoryId)}</td>
+                    <td style={{ color: 'var(--ink-soft)' }}>{a.note || '—'}</td>
+                    <td className="num">{a.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {pagination && pagination.totalPages > 1 && (
+              <div className="report-pagination" aria-label="Actuals pagination">
+                <span className="report-pagination-status">Page {pagination.page} of {pagination.totalPages}</span>
+                <div className="report-pagination-buttons">
+                  <button className="report-pagination-button" type="button" onClick={() => setPage((current) => current - 1)} disabled={!pagination.hasPrevious}>
+                    Previous
+                  </button>
+                  <button className="report-pagination-button" type="button" onClick={() => setPage((current) => current + 1)} disabled={!pagination.hasNext}>
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>

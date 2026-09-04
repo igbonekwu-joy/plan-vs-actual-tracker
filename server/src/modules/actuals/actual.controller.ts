@@ -23,8 +23,38 @@ export const createActualHandler = async (req: Request, res: Response, next: Nex
 
 export const listActualsHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { startMonth, endMonth } = req.query as { startMonth?: string; endMonth?: string };
-    const actuals = await actualService.listActuals(req.userId!, startMonth, endMonth);
+    const { startMonth, endMonth, page, pageSize } = req.query as {
+      startMonth?: string;
+      endMonth?: string;
+      page?: string;
+      pageSize?: string;
+    };
+
+    let parsedPage: number | undefined;
+    let parsedPageSize: number | undefined;
+    if (page !== undefined || pageSize !== undefined) {
+      parsedPage = page === undefined ? 1 : Number(page);
+      parsedPageSize = pageSize === undefined ? 10 : Number(pageSize);
+      if (
+        !Number.isInteger(parsedPage) ||
+        parsedPage < 1 ||
+        !Number.isInteger(parsedPageSize) ||
+        parsedPageSize < 1 ||
+        parsedPageSize > 100
+      ) {
+        return res.status(400).json({
+          error: 'page must be a positive integer and pageSize must be between 1 and 100',
+        });
+      }
+    }
+
+    const actuals = await actualService.listActuals(
+      req.userId!,
+      startMonth,
+      endMonth,
+      parsedPage,
+      parsedPageSize,
+    );
     res.status(200).json(actuals);
   } catch (err) {
     next(err);

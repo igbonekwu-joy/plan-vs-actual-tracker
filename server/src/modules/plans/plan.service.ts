@@ -49,13 +49,38 @@ export const createOrUpdatePlan = async (
     return plan;
 };
 
-export const listPlans = async (userId: string, startMonth?: string, endMonth?: string) => {
+export const listPlans = async (
+    userId: string,
+    startMonth?: string,
+    endMonth?: string,
+    page?: number,
+    pageSize?: number,
+) => {
     const filter: any = { userId };
     if (startMonth && endMonth) {
     filter.month = { $gte: startMonth, $lte: endMonth };
     }
-    return Plan
+    const plansQuery = Plan
         .find(filter)
         .populate('categoryId', 'name')
         .sort({ month: 1 });
+
+    if (page === undefined || pageSize === undefined) return plansQuery;
+
+    const totalItems = await Plan.countDocuments(filter);
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    const currentPage = Math.min(page, totalPages);
+    const plans = await plansQuery.skip((currentPage - 1) * pageSize).limit(pageSize);
+
+    return {
+        items: plans,
+        pagination: {
+            page: currentPage,
+            pageSize,
+            totalItems,
+            totalPages,
+            hasPrevious: currentPage > 1,
+            hasNext: currentPage < totalPages,
+        },
+    };
 };

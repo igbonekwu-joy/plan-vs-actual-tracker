@@ -1,11 +1,14 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { apiRequest, ApiError } from '../api/client';
-import { Category } from '../api/types';
+import { Category, PaginatedResponse, Pagination } from '../api/types';
 
 export default function CategoriesPage() {
   const { token } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -14,8 +17,9 @@ export default function CategoriesPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const data = await apiRequest<Category[]>('/categories', { token });
-      setCategories(data);
+      const data = await apiRequest<PaginatedResponse<Category>>(`/categories?page=${page}&pageSize=${pageSize}`, { token });
+      setCategories(data.items);
+      setPagination(data.pagination);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not load categories.');
     } finally {
@@ -23,7 +27,7 @@ export default function CategoriesPage() {
     }
   };
 
-  useEffect(() => { load(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { load(); }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -33,6 +37,7 @@ export default function CategoriesPage() {
     try {
       await apiRequest<Category>('/categories', { method: 'POST', token, body: { name: name.trim() } });
       setName('');
+      setPage(1);
       await load();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not create category.');
@@ -75,16 +80,31 @@ export default function CategoriesPage() {
         ) : categories.length === 0 ? (
           <p className="empty-state">No categories yet. Add one above to get started.</p>
         ) : (
-          <table>
-            <thead>
-              <tr><th>Name</th></tr>
-            </thead>
-            <tbody>
-              {categories.map((c) => (
-                <tr key={c._id}><td>{c.name}</td></tr>
-              ))}
-            </tbody>
-          </table>
+          <>
+            <table>
+              <thead>
+                <tr><th>Name</th></tr>
+              </thead>
+              <tbody>
+                {categories.map((c, index) => (
+                  <tr key={c._id || `${c.name}-${index}`}><td>{c.name}</td></tr>
+                ))}
+              </tbody>
+            </table>
+            {pagination && pagination.totalPages > 1 && (
+              <div className="report-pagination" aria-label="Categories pagination">
+                <span className="report-pagination-status">Page {pagination.page} of {pagination.totalPages}</span>
+                <div className="report-pagination-buttons">
+                  <button className="report-pagination-button" type="button" onClick={() => setPage((current) => current - 1)} disabled={!pagination.hasPrevious}>
+                    Previous
+                  </button>
+                  <button className="report-pagination-button" type="button" onClick={() => setPage((current) => current + 1)} disabled={!pagination.hasNext}>
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>

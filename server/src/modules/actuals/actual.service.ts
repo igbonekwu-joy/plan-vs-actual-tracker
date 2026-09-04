@@ -32,12 +32,40 @@ export const createActual = async (
   });
 };
 
-export const listActuals = async (userId: string, startMonth?: string, endMonth?: string) => {
+export const listActuals = async (
+  userId: string,
+  startMonth?: string,
+  endMonth?: string,
+  page?: number,
+  pageSize?: number,
+) => {
   const filter: any = { userId };
   if (startMonth && endMonth) {
     filter.month = { $gte: startMonth, $lte: endMonth };
   }
-  return Actual.find(filter).select('-_id categoryId month amount note').populate('categoryId', 'name').sort({ month: 1 });
+  const actualsQuery = Actual.find(filter)
+    .select('-_id categoryId month amount note')
+    .populate('categoryId', 'name')
+    .sort({ month: 1 });
+
+  if (page === undefined || pageSize === undefined) return actualsQuery;
+
+  const totalItems = await Actual.countDocuments(filter);
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const actuals = await actualsQuery.skip((currentPage - 1) * pageSize).limit(pageSize);
+
+  return {
+    items: actuals,
+    pagination: {
+      page: currentPage,
+      pageSize,
+      totalItems,
+      totalPages,
+      hasPrevious: currentPage > 1,
+      hasNext: currentPage < totalPages,
+    },
+  };
 };
 
 export const importActualsFromCsv = async (userId: string, rows: CsvRow[]) => {

@@ -1,7 +1,7 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { apiRequest, ApiError } from '../api/client';
-import { Category, Plan, categoryName } from '../api/types';
+import { Category, PaginatedResponse, Pagination, Plan, categoryName } from '../api/types';
 
 const currentMonth = () => new Date().toISOString().slice(0, 7);
 
@@ -9,6 +9,9 @@ export default function PlansPage() {
   const { token } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   const [categoryId, setCategoryId] = useState('');
   const [month, setMonth] = useState(currentMonth());
   const [targetAmount, setTargetAmount] = useState('');
@@ -27,11 +30,12 @@ export default function PlansPage() {
   const loadPlans = async () => {
     setLoading(true);
     try {
-      const data = await apiRequest<Plan[]>(
-        `/plans?startMonth=${rangeStart}&endMonth=${rangeEnd}`,
+      const data = await apiRequest<PaginatedResponse<Plan>>(
+        `/plans?startMonth=${rangeStart}&endMonth=${rangeEnd}&page=${page}&pageSize=${pageSize}`,
         { token },
       );
-      setPlans(data);
+      setPlans(data.items);
+      setPagination(data.pagination);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Could not load plans.');
     } finally {
@@ -40,7 +44,8 @@ export default function PlansPage() {
   };
 
   useEffect(() => { loadCategories(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { loadPlans(); }, [rangeStart, rangeEnd]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setPage(1); }, [rangeStart, rangeEnd]);
+  useEffect(() => { loadPlans(); }, [rangeStart, rangeEnd, page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -130,20 +135,35 @@ export default function PlansPage() {
         ) : plans.length === 0 ? (
           <p className="empty-state">No plans set for this range yet.</p>
         ) : (
-          <table>
-            <thead>
-              <tr><th>Month</th><th>Category</th><th style={{ textAlign: 'right' }}>Target</th></tr>
-            </thead>
-            <tbody>
-              {plans.map((p) => (
-                <tr key={p._id}>
-                  <td className="mono">{p.month}</td>
-                  <td>{categoryName(p.categoryId)}</td>
-                  <td className="num">{p.targetAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <>
+            <table>
+              <thead>
+                <tr><th>Month</th><th>Category</th><th style={{ textAlign: 'right' }}>Target</th></tr>
+              </thead>
+              <tbody>
+                {plans.map((p) => (
+                  <tr key={p._id}>
+                    <td className="mono">{p.month}</td>
+                    <td>{categoryName(p.categoryId)}</td>
+                    <td className="num">{p.targetAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {pagination && pagination.totalPages > 1 && (
+              <div className="report-pagination" aria-label="Plans pagination">
+                <span className="report-pagination-status">Page {pagination.page} of {pagination.totalPages}</span>
+                <div className="report-pagination-buttons">
+                  <button className="report-pagination-button" type="button" onClick={() => setPage((current) => current - 1)} disabled={!pagination.hasPrevious}>
+                    Previous
+                  </button>
+                  <button className="report-pagination-button" type="button" onClick={() => setPage((current) => current + 1)} disabled={!pagination.hasNext}>
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>

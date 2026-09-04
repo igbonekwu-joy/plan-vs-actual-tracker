@@ -17,7 +17,26 @@ export const createCategoryHandler = async (req: Request, res: Response, next: N
 
 export const listCategoriesHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const categories = await categoryService.listCategories(req.userId!);
+    const { page, pageSize } = req.query as { page?: string; pageSize?: string };
+    let parsedPage: number | undefined;
+    let parsedPageSize: number | undefined;
+    if (page !== undefined || pageSize !== undefined) {
+      parsedPage = page === undefined ? 1 : Number(page);
+      parsedPageSize = pageSize === undefined ? 10 : Number(pageSize);
+      if (
+        !Number.isInteger(parsedPage) ||
+        parsedPage < 1 ||
+        !Number.isInteger(parsedPageSize) ||
+        parsedPageSize < 1 ||
+        parsedPageSize > 100
+      ) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          error: 'page must be a positive integer and pageSize must be between 1 and 100',
+        });
+      }
+    }
+
+    const categories = await categoryService.listCategories(req.userId!, parsedPage, parsedPageSize);
     res.status(StatusCodes.OK).json(categories);
   } catch (err) {
     next(err);

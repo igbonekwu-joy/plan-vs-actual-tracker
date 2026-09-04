@@ -18,6 +18,20 @@ export interface Actual {
   note?: string;
 }
 
+export interface Pagination {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  pagination: Pagination;
+}
+
 export interface ReportRow {
   categoryId: string;
   category: string;

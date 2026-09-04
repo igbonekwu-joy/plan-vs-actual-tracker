@@ -17,9 +17,30 @@ export const unlockMonth = async (userId: string, month: string) => {
   return result;
 };
 
-export const listLockedMonths = async (userId: string) => {
-  const locks = await Lock.find({ userId }).sort({ month: 1 });
-  return locks.map((l) => l.month);
+export const listLockedMonths = async (userId: string, page?: number, pageSize?: number) => {
+  const locksQuery = Lock.find({ userId }).sort({ month: 1 });
+
+  if (page === undefined || pageSize === undefined) {
+    const locks = await locksQuery;
+    return locks.map((l) => l.month);
+  }
+
+  const totalItems = await Lock.countDocuments({ userId });
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const locks = await locksQuery.skip((currentPage - 1) * pageSize).limit(pageSize);
+
+  return {
+    items: locks.map((l) => l.month),
+    pagination: {
+      page: currentPage,
+      pageSize,
+      totalItems,
+      totalPages,
+      hasPrevious: currentPage > 1,
+      hasNext: currentPage < totalPages,
+    },
+  };
 };
 
 export const isMonthLocked = async (userId: string, month: string): Promise<boolean> => {

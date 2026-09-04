@@ -139,15 +139,15 @@ export default function ReportPage() {
               </tbody>
             </table>
             {report.pagination.totalPages > 1 && (
-              <div className="section-toolbar" style={{ marginTop: '1rem' }}>
-                <span>
+              <div className="report-pagination" aria-label="Report pagination">
+                <span className="report-pagination-status">
                   Page {report.pagination.page} of {report.pagination.totalPages}
                 </span>
-                <div className="button-row">
-                  <button type="button" onClick={() => setPage((current) => current - 1)} disabled={!report.pagination.hasPrevious}>
+                <div className="report-pagination-buttons">
+                  <button className="report-pagination-button" type="button" onClick={() => setPage((current) => current - 1)} disabled={!report.pagination.hasPrevious}>
                     Previous
                   </button>
-                  <button type="button" onClick={() => setPage((current) => current + 1)} disabled={!report.pagination.hasNext}>
+                  <button className="report-pagination-button" type="button" onClick={() => setPage((current) => current + 1)} disabled={!report.pagination.hasNext}>
                     Next
                   </button>
                 </div>
