@@ -35,6 +35,14 @@ export interface ReportResponse {
     labels: string[];
     data: number[];
   };
+  pagination: {
+    page: number;
+    pageSize: number;
+    totalRows: number;
+    totalPages: number;
+    hasPrevious: boolean;
+    hasNext: boolean;
+  };
 }
 
 export function categoryName(c: string | Category): string {

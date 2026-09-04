@@ -28,6 +28,8 @@ export default function ReportPage() {
   const [rangeStart, setRangeStart] = useState(monthsAgo(2));
   const [rangeEnd, setRangeEnd] = useState(currentMonth());
   const [report, setReport] = useState<ReportResponse | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,7 +38,7 @@ export default function ReportPage() {
     setError(null);
     try {
       const data = await apiRequest<ReportResponse>(
-        `/report?startMonth=${rangeStart}&endMonth=${rangeEnd}`,
+        `/report?startMonth=${rangeStart}&endMonth=${rangeEnd}&page=${page}&pageSize=${pageSize}`,
         { token },
       );
       setReport(data);
@@ -47,7 +49,8 @@ export default function ReportPage() {
     }
   };
 
-  useEffect(() => { load(); }, [rangeStart, rangeEnd]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { setPage(1); }, [rangeStart, rangeEnd]);
+  useEffect(() => { load(); }, [rangeStart, rangeEnd, page]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const chartData = report?.chart.labels.map((label, i) => ({
     month: label,
@@ -135,6 +138,21 @@ export default function ReportPage() {
                 ))}
               </tbody>
             </table>
+            {report.pagination.totalPages > 1 && (
+              <div className="section-toolbar" style={{ marginTop: '1rem' }}>
+                <span>
+                  Page {report.pagination.page} of {report.pagination.totalPages}
+                </span>
+                <div className="button-row">
+                  <button type="button" onClick={() => setPage((current) => current - 1)} disabled={!report.pagination.hasPrevious}>
+                    Previous
+                  </button>
+                  <button type="button" onClick={() => setPage((current) => current + 1)} disabled={!report.pagination.hasNext}>
+                    Next
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </>
       )}

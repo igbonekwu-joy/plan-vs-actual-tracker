@@ -8,7 +8,13 @@ import { ReportRow } from '../../types/types';
 
 const monthRegex = /^\d{4}-(0[1-9]|1[0-2])$/;
 
-export const getReport = async (userId: string, startMonth: string, endMonth: string) => {
+export const getReport = async (
+  userId: string,
+  startMonth: string,
+  endMonth: string,
+  page = 1,
+  pageSize = 50,
+) => {
   if (!startMonth || !endMonth) {
     throw new HttpError('startMonth and endMonth are required', 400);
   }
@@ -17,6 +23,9 @@ export const getReport = async (userId: string, startMonth: string, endMonth: st
   }
   if (startMonth > endMonth) {
     throw new HttpError('startMonth must not be after endMonth', 400);
+  }
+  if (!Number.isInteger(page) || page < 1 || !Number.isInteger(pageSize) || pageSize < 1 || pageSize > 100) {
+    throw new HttpError('page must be a positive integer and pageSize must be between 1 and 100', 400);
   }
 
   const userObjectId = new mongoose.Types.ObjectId(userId);
@@ -99,5 +108,21 @@ export const getReport = async (userId: string, startMonth: string, endMonth: st
     data: sortedMonths.map((m) => monthlyNetVariance.get(m)!),
   };
 
-  return { rows, chart };
+  const totalRows = rows.length;
+  const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * pageSize;
+
+  return {
+    rows: rows.slice(startIndex, startIndex + pageSize),
+    chart,
+    pagination: {
+      page: currentPage,
+      pageSize,
+      totalRows,
+      totalPages,
+      hasPrevious: currentPage > 1,
+      hasNext: currentPage < totalPages,
+    },
+  };
 };
