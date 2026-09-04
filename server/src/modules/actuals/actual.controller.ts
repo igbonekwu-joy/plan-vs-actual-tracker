@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { parse } from 'csv-parse/sync';
 import * as actualService from './actual.service';
+import { CsvRow } from '../../types/types';
 
 export const createActualHandler = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -30,21 +31,21 @@ export const listActualsHandler = async (req: Request, res: Response, next: Next
   }
 };
 
-// export const importActualsHandler = async (req: Request, res: Response, next: NextFunction) => {
-//   try {
-//     if (!req.file) {
-//       return res.status(400).json({ error: 'CSV file is required (field name: file)' });
-//     }
+export const importActualsHandler = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'CSV file is required (field name: file)' });
+    }
 
-//     const records = parse(req.file.buffer.toString(), {
-//       columns: true,
-//       skip_empty_lines: true,
-//       trim: true,
-//     });
+    const records: CsvRow[] = parse(req.file.buffer.toString(), {
+      columns: true,
+      skip_empty_lines: true,
+      trim: true,
+    });
 
-//     const inserted = await actualService.importActualsFromCsv(req.userId!, records);
-//     res.status(201).json({ imported: inserted.length });
-//   } catch (err) {
-//     next(err);
-//   }
-// };
+    const inserted = await actualService.importActualsFromCsv(req.userId!, records);
+    res.status(201).json({ imported: inserted.length });
+  } catch (err) {
+    next(err);
+  }
+};
