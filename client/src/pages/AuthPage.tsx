@@ -7,6 +7,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -16,8 +17,18 @@ export default function AuthPage() {
     try {
       if (mode === 'login') {
         await login(email, password);
+        setSuccess('Login successful');
+
+        setTimeout(() => {
+          window.location.href = '/'; 
+        }, 2000);
       } else {
         await signup(email, password);
+        setSuccess('Account created successfully');
+
+        setTimeout(() => {
+          window.location.href = '/'; 
+        }, 2000);
       }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong. Try again.');
@@ -33,6 +44,7 @@ export default function AuthPage() {
         <p>Set a target, log what really happened, see the gap.</p>
 
         {error && <div className="error-banner">{error}</div>}
+        {success && <div className="success-banner">{success}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="field">

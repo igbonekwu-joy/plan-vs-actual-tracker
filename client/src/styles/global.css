@@ -289,6 +289,16 @@ tr:last-child td { border-bottom: none; }
   margin-bottom: 16px;
 }
 
+.success-banner {
+  background: #E6F4EA;
+  border: 1px solid var(--positive);
+  color: #2E6D3B;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+
 .auth-shell {
   min-height: 100vh;
   display: flex;
