@@ -119,17 +119,13 @@ month,category,amount
 2026-02,Payroll,19800
 ```
 
-Categories referenced in the CSV must already exist for the user — the importer does not auto-create categories. Import is all-or-nothing: if any row fails validation (bad month format, unknown category, invalid amount), the entire import is rejected and nothing is inserted.
+Categories referenced in the CSV must already exist for the user. The importer does not auto-create categories. Import is all-or-nothing: if any row fails validation (bad month format, unknown category, invalid amount), the entire import is rejected and nothing is inserted.
 
 ## Locking
 
-Granularity: **month** (documented choice — quarter was the alternative but month aligns directly with how Plans and Actuals are already keyed).
+Granularity: **month** (documented choice. Quarter was the alternative but month aligns directly with how Plans and Actuals are already keyed).
 
 A lock is a document keyed on `userId + month` in the `Lock` collection; its existence is the lock state (no separate boolean flag). Enforcement happens **server-side** in the service layer, not just hidden in the UI: `PUT /api/plans`, `POST /api/actuals`, and `POST /api/actuals/import` all check lock status before writing and reject with `423 Locked` if the target month is locked. CSV import checks every unique month present in the batch in a single query before inserting anything, so a locked month anywhere in the file blocks the whole import.
-
-## CSRF
-
-Not implemented. Authentication uses Bearer tokens sent via the `Authorization` header rather than cookies. Since browsers do not automatically attach this header to cross-origin requests (unlike cookies), CSRF — which relies on that automatic attachment — is not applicable to this architecture.
 
 ## Data Modeling & Indexing Notes
 
@@ -163,4 +159,3 @@ All tests use `mongodb-memory-server`, so a separate test MongoDB instance is no
 - [x] Actuals (manual entry + CSV import)
 - [x] Locking (month granularity, server-enforced)
 - [ ] Report view (Plan vs Actual with variance, date-range filtering, chart)
-- [ ] Deployment
