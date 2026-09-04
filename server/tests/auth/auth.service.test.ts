@@ -23,8 +23,8 @@ describe('authService.signup', () => {
 describe('authService.login', () => {
   it('returns a token for correct credentials', async () => {
     await authService.signup('joy@example.com', 'password123');
-    const { access_token } = await authService.login('joy@example.com', 'password123');
-    expect(typeof access_token).toBe('string');
+    const { accessToken } = await authService.login('joy@example.com', 'password123');
+    expect(typeof accessToken).toBe('string');
   });
 
   it('rejects wrong password', async () => {

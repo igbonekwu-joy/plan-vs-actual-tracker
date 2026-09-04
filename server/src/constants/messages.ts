@@ -7,6 +7,9 @@ export const SUCCESS = {
   category: {
     created: 'Category created successfully',
   },
+  plan: {
+    upserted: 'Plan upserted successfully',
+  },
 } as const;
 
 export const ERROR = {
