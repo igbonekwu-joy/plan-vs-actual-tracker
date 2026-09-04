@@ -109,6 +109,7 @@ All routes below except `/api/auth/*` require an `Authorization: Bearer <token>`
 | POST | `/api/locks` | Lock a month (`{ "month": "2026-01" }`) |
 | DELETE | `/api/locks/:month` | Unlock a month |
 | GET | `/api/locks` | List all locked months |
+| GET | `/api/report` | List out a comprehensive budget report |
 
 ### CSV import format
 
