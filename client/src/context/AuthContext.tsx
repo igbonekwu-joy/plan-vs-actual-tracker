@@ -23,7 +23,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       method: 'POST',
       body: { email: emailInput, password },
     });
-    console.log(res);
+    setToken("auth_token");
+    localStorage.setItem(STORAGE_KEY, "auth_token");
     setEmail(emailInput);
     localStorage.setItem(EMAIL_KEY, emailInput);
   }, []);
