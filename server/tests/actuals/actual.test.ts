@@ -74,7 +74,8 @@ describe('POST /api/actuals/import', () => {
       .set('Cookie', accessCookie)
       .attach('file', Buffer.from(csv), 'actuals.csv');
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(201);
+    expect(res.body.imported).toBe(3);
   });
 
   it('rejects the whole import if any row is invalid, with no partial insert', async () => {
@@ -86,7 +87,7 @@ describe('POST /api/actuals/import', () => {
       .set('Cookie', accessCookie)
       .attach('file', Buffer.from(csv), 'actuals.csv');
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(400);
 
     const listRes = await request(app).get('/api/actuals').set('Cookie', accessCookie);
     expect(listRes.body).toHaveLength(0); // confirms nothing was inserted
@@ -101,7 +102,7 @@ describe('POST /api/actuals/import', () => {
       .set('Cookie', accessCookie)
       .attach('file', Buffer.from(csv), 'actuals.csv');
 
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(400);
   });
 });
 
