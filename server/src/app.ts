@@ -10,8 +10,19 @@ import reportRoutes from './modules/report/report.route';
 import { authGuard } from './middleware/authGuard';
 import { errorHandler } from './middleware/errorHandler';
 import { attachCSRF } from './middleware/csrfHandler';
+import cors from 'cors';
+import { env } from './config/env';
 
 const app: Application = express();
+
+app.use(cors({
+  origin: env().WEB_URL,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-api-version', 'X-CSRF-Token'],
+  exposedHeaders: ['X-CSRF-Token'],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(attachCSRF);
