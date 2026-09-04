@@ -17,6 +17,10 @@ Plan vs Actual is a mini financial reporting tool for turning a monthly budget i
 ```text
 .
 ├── README.md
+├── client/
+│   ├── package.json
+│   ├── .env.example
+│   └── src/
 └── server/
 	├── package.json
 	├── tsconfig.json
@@ -54,7 +58,7 @@ Plan vs Actual is a mini financial reporting tool for turning a monthly budget i
 
 ## Installation
 
-From the repository root:
+Install the server dependencies from the repository root:
 
 ```powershell
 cd server
@@ -79,6 +83,25 @@ NODE_ENV=development
 
 Use a strong, unique `JWT_SECRET` outside local development.
 
+Install the client dependencies from the repository root:
+
+```powershell
+cd ..\client
+pnpm install
+```
+
+Create the client environment file:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Set `client/.env` to the URL where the server is running:
+
+```env
+VITE_API_BASE_URL=http://localhost:4000/api
+```
+
 ## Running the Server
 
 Start the development server from `server/`:
@@ -89,9 +112,21 @@ pnpm run dev
 
 The server connects to MongoDB before listening. With the example configuration, the API is available at `http://localhost:4000`.
 
+## Running the Client
+
+Start the Vite development server from `client/` in a second terminal:
+
+```powershell
+cd client
+pnpm run dev
+```
+
+The client is available at the URL printed by Vite, normally `http://localhost:5173`.
+Keep both the server and client development processes running while using the application. The server's `WEB_URL` should match the client URL when CORS is enabled.
+
 ## API Overview
 
-All routes below except `/api/auth/*` require an `Authorization: Bearer <token>` header. Every query is scoped to the authenticated user — no user can read or modify another user's data.
+All routes below except `/api/auth/*` require authentication. The browser sends the server-issued HTTP-only authentication cookie with API requests. Every query is scoped to the authenticated user — no user can read or modify another user's data.
 
 | Method | Route | Description |
 |---|---|---|
