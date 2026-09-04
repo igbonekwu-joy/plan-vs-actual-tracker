@@ -1,21 +1,23 @@
 import { HttpError } from "../../errors/HttpError";
 import { Category } from "../../models/Category";
 import { Plan } from "../../models/Plan";
+import { isMonthLocked } from "../locks/lock.service";
+import { StatusCodes } from "http-status-codes";
 
 const assertNotLocked = async (userId: string, month: string) => {
-    // COME BACK TO: replace with real lock check once I implement lock feature
-    return;
+    const locked = await isMonthLocked(userId, month);
+    if (locked) throw new HttpError(`Cannot modify plan: ${month} is locked`, StatusCodes.LOCKED);
 };
 
 const assertCategoryOwnership = async (userId: string, categoryId: string) => {
     const category = await Category.findOne({ _id: categoryId, userId });
-    if (!category) throw new HttpError('Category not found', 404);
+    if (!category) throw new HttpError('Category not found', StatusCodes.NOT_FOUND);
 };
 
 const assertMonthIsCurrentOrFuture = (month: string) => {
     const match = /^(\d{4})-(0[1-9]|1[0-2])$/.exec(month);
     if (!match) {
-        throw new HttpError('month must be in YYYY-MM format', 400);
+        throw new HttpError('month must be in YYYY-MM format', StatusCodes.BAD_REQUEST);
     }
 
     const now = new Date();
@@ -25,7 +27,7 @@ const assertMonthIsCurrentOrFuture = (month: string) => {
     const currentMonth = now.getMonth() + 1;
 
     if (planYear < currentYear || (planYear === currentYear && planMonth < currentMonth)) {
-        throw new HttpError('Plan month cannot be in the past', 400);
+        throw new HttpError('Plan month cannot be in the past', StatusCodes.BAD_REQUEST);
     }
 };
 

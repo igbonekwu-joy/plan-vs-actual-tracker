@@ -1,11 +1,14 @@
 import { HttpError } from '../../errors/HttpError';
 import { Actual } from '../../models/Actual';
 import { Category } from '../../models/Category';
+import { Lock } from '../../models/Lock';
 import { CsvRow } from '../../types/types';
+import { isMonthLocked } from '../locks/lock.service';
+import { StatusCodes } from 'http-status-codes';
 
 const assertNotLocked = async (userId: string, month: string) => {
-  // COME BACK TO THIS: replace with real lock check once Lock model exists
-  return;
+  const locked = await isMonthLocked(userId, month);
+  if (locked) throw new HttpError(`Cannot modify actuals: ${month} is locked`, StatusCodes.LOCKED);
 };
 
 export const createActual = async (
@@ -16,7 +19,7 @@ export const createActual = async (
   note?: string
 ) => {
   const category = await Category.findOne({ _id: categoryId, userId });
-  if (!category) throw new HttpError('Category not found', 404);
+  if (!category) throw new HttpError('Category not found', StatusCodes.NOT_FOUND);
 
   await assertNotLocked(userId, month);
 
@@ -71,6 +74,13 @@ export const importActualsFromCsv = async (userId: string, rows: CsvRow[]) => {
 
   if (errors.length > 0) {
     throw new HttpError(`CSV validation failed: ${errors.join('; ')}`, 400);
+  }
+
+  const uniqueMonths = [...new Set(toInsert.map((r) => r.month))];
+  const lockedMonths = await Lock.find({ userId, month: { $in: uniqueMonths } });
+  if (lockedMonths.length > 0) {
+    const lockedList = lockedMonths.map((l) => l.month).join(', ');
+    throw new HttpError(`Cannot import: the following months are locked: ${lockedList}`, StatusCodes.LOCKED);
   }
 
   return Actual.insertMany(toInsert);
