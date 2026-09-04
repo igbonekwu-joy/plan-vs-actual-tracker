@@ -2,8 +2,6 @@
 
 Plan vs Actual is a mini financial reporting tool for turning a monthly budget into a clear, useful report. Users set spending targets for categories, record their actual spending, and compare planned amounts with real results.
 
-The project is being built as a backend-first application. The current implementation includes user authentication, category management, monthly budget plans, actual expense tracking (with CSV import), and period locking — all persisted in MongoDB with JWT-based auth and per-user data isolation. The reporting/variance view is the remaining module.
-
 ## Product Goals
 
 - Create monthly spending plans by category.
