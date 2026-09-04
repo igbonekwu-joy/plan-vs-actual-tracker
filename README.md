@@ -180,4 +180,4 @@ All tests use `mongodb-memory-server`, so a separate test MongoDB instance is no
 - [x] Plans (monthly targets)
 - [x] Actuals (manual entry + CSV import)
 - [x] Locking (month granularity, server-enforced)
-- [ ] Report view (Plan vs Actual with variance, date-range filtering, chart)
+- [x] Report view (Plan vs Actual with variance, date-range filtering, chart)
