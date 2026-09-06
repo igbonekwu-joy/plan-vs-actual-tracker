@@ -28,7 +28,7 @@ export default function ActualsPage() {
   const loadCategories = async () => {
     const data = await apiRequest<Category[]>('/categories', { token });
     setCategories(data);
-    if (data.length > 0 && !categoryId) setCategoryId(data[0]._id);
+    if (data.length > 0 && !categoryId) setCategoryId(data[0].id);
   };
 
   const loadActuals = async () => {
@@ -53,6 +53,7 @@ export default function ActualsPage() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    console.log('Submitting actual:', { categoryId, month, amount, note });
     if (!categoryId || !month || amount === '') return;
     setSubmitting(true);
     setError(null);
@@ -124,7 +125,7 @@ export default function ActualsPage() {
             <div className="field">
               <label htmlFor="act-category">Category</label>
               <select id="act-category" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-                {categories.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
+                {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
             </div>
             <div className="field">
@@ -193,7 +194,7 @@ export default function ActualsPage() {
               </thead>
               <tbody>
                 {actuals.map((a) => (
-                  <tr key={a._id}>
+                  <tr key={a.id}>
                     <td className="mono">{a.month}</td>
                     <td>{categoryName(a.categoryId)}</td>
                     <td style={{ color: 'var(--ink-soft)' }}>{a.note || '—'}</td>

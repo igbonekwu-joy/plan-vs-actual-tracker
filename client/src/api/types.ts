@@ -5,6 +5,7 @@ export interface Category {
 }
 
 export interface Plan {
+  id: string;
   _id: string;
   categoryId: string | Category;
   month: string;
@@ -12,6 +13,7 @@ export interface Plan {
 }
 
 export interface Actual {
+  id: string;
   _id: string;
   categoryId: string | Category;
   month: string;

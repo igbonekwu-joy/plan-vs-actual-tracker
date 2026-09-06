@@ -44,9 +44,9 @@ export const listActuals = async (
     filter.month = { $gte: startMonth, $lte: endMonth };
   }
   const actualsQuery = Actual.find(filter)
-    .select('-_id categoryId month amount note')
+    .select('id categoryId month amount note')
     .populate('categoryId', 'name')
-    .sort({ month: 1 });
+    .sort({ month: -1 });
 
   if (page === undefined || pageSize === undefined) return actualsQuery;
 

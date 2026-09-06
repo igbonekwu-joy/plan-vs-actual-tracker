@@ -142,7 +142,7 @@ export default function PlansPage() {
               </thead>
               <tbody>
                 {plans.map((p) => (
-                  <tr key={p._id}>
+                  <tr key={p.id}>
                     <td className="mono">{p.month}</td>
                     <td>{categoryName(p.categoryId)}</td>
                     <td className="num">{p.targetAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
