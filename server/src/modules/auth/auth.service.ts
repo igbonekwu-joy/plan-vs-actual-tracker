@@ -4,6 +4,7 @@ import { User } from '../../models/User';
 import { HttpError } from '../../errors/HttpError';
 import { env } from '../../config/env';
 import { generateAccessToken, generateRefreshToken, regenerateRefreshToken } from '../../utils/tokens';
+import { RefreshToken } from '../../models/RefreshToken';
 
 
 export const signup = async (email: string, password: string) => {
@@ -33,4 +34,10 @@ export const refresh = async (token: string) => {
   if (!regenerated) throw new HttpError('Invalid or expired refresh token', 401);
 
   return regenerated;
+};
+
+export const logout = async (refreshToken?: string) => {
+  if (refreshToken) {
+    await RefreshToken.deleteOne({ token: refreshToken });
+  }
 };

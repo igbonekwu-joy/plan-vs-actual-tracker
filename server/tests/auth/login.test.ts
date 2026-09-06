@@ -2,6 +2,7 @@
 import request from 'supertest';
 import app from '../../src/app';
 import { connectTestDb, clearTestDb, closeTestDb } from '../setup/testDb';
+import { RefreshToken } from '../../src/models/RefreshToken';
 
 beforeAll(connectTestDb);
 afterEach(clearTestDb);
@@ -38,5 +39,27 @@ describe('POST /api/auth/login', () => {
       .post('/api/auth/login')
       .send({ email: 'nobody@example.com', password: 'password123' });
     expect(res.status).toBe(401);
+  });
+
+  it('logs out, revokes the refresh token, and clears auth cookies', async () => {
+    const login = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'joy@example.com', password: 'password123' });
+
+    expect(await RefreshToken.countDocuments()).toBe(1);
+
+    const logout = await request(app)
+      .post('/api/auth/logout')
+      .set('Cookie', login.headers['set-cookie']);
+
+    expect(logout.status).toBe(200);
+    expect(logout.body.message).toBe('Logout successful');
+    expect(await RefreshToken.countDocuments()).toBe(0);
+    expect(logout.headers['set-cookie']).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^access_token=;.*Expires=Thu, 01 Jan 1970 00:00:00 GMT/),
+        expect.stringMatching(/^refresh_token=;.*Expires=Thu, 01 Jan 1970 00:00:00 GMT/),
+      ])
+    );
   });
 });

@@ -60,3 +60,18 @@ export const refreshTokenHandler = async (req: Request, res: Response, next: Nex
     next(err);
   }
 };
+
+export const logoutHandler = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await authService.logout(req.cookies?.refresh_token);
+
+    const secure = env().NODE_ENV === 'production';
+    const cookieOptions = { httpOnly: true, secure, sameSite: 'strict' as const };
+    res.clearCookie('access_token', cookieOptions);
+    res.clearCookie('refresh_token', cookieOptions);
+
+    res.status(StatusCodes.OK).json({ message: 'Logout successful' });
+  } catch (err) {
+    next(err);
+  }
+};

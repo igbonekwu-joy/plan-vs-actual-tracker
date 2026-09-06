@@ -6,7 +6,7 @@ interface AuthContextValue {
   email: string | null;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -34,11 +34,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await login(emailInput, password);
   }, [login]);
 
-  const logout = useCallback(() => {
-    setToken(null);
-    setEmail(null);
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(EMAIL_KEY);
+  const logout = useCallback(async () => {
+    try {
+      await apiRequest('/auth/logout', { method: 'POST' });
+    } finally {
+      setToken(null);
+      setEmail(null);
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(EMAIL_KEY);
+    }
   }, []);
 
   return (

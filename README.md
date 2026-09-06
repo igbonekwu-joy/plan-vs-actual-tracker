@@ -128,21 +128,21 @@ Keep both the server and client development processes running while using the ap
 
 All routes below except `/api/auth/*` require authentication. The browser sends the server-issued HTTP-only authentication cookie with API requests. Every query is scoped to the authenticated user — no user can read or modify another user's data.
 
-| Method | Route | Description |
-|---|---|---|
-| POST | `/api/auth/signup` | Create an account |
-| POST | `/api/auth/login` | Log in, receive a JWT |
-| POST | `/api/categories` | Create a category |
-| GET | `/api/categories` | List the user's categories |
-| PUT | `/api/plans` | Create or update a monthly target (upsert by category + month) |
-| GET | `/api/plans?startMonth=&endMonth=` | List plans, optionally filtered by date range |
-| POST | `/api/actuals` | Log a single actual expense |
-| GET | `/api/actuals?startMonth=&endMonth=` | List actuals, optionally filtered by date range |
-| POST | `/api/actuals/import` | Bulk import actuals via CSV (`multipart/form-data`, field name `file`) |
-| POST | `/api/locks` | Lock a month (`{ "month": "2026-01" }`) |
-| DELETE | `/api/locks/:month` | Unlock a month |
-| GET | `/api/locks` | List all locked months |
-| GET | `/api/report` | List out a comprehensive budget report |
+| Method | Route                                | Description                                                            |
+| ------ | ------------------------------------ | ---------------------------------------------------------------------- |
+| POST   | `/api/auth/signup`                   | Create an account                                                      |
+| POST   | `/api/auth/login`                    | Log in, receive a JWT                                                  |
+| POST   | `/api/categories`                    | Create a category                                                      |
+| GET    | `/api/categories`                    | List the user's categories                                             |
+| PUT    | `/api/plans`                         | Create or update a monthly target (upsert by category + month)         |
+| GET    | `/api/plans?startMonth=&endMonth=`   | List plans, optionally filtered by date range                          |
+| POST   | `/api/actuals`                       | Log a single actual expense                                            |
+| GET    | `/api/actuals?startMonth=&endMonth=` | List actuals, optionally filtered by date range                        |
+| POST   | `/api/actuals/import`                | Bulk import actuals via CSV (`multipart/form-data`, field name `file`) |
+| POST   | `/api/locks`                         | Lock a month (`{ "month": "2026-01" }`)                                |
+| DELETE | `/api/locks/:month`                  | Unlock a month                                                         |
+| GET    | `/api/locks`                         | List all locked months                                                 |
+| GET    | `/api/report`                        | List out a comprehensive budget report                                 |
 
 ### CSV import format
 
@@ -169,6 +169,7 @@ Each row represents one category+month combination and includes only category+mo
 pairs where a plan or an actual exists — not every category for every month in range.
 
 **Edge case handling:**
+
 - **Missing actual** (no actual entries logged for that category+month): `actual`,
   `variance`, and `variancePercent` are all returned as the string `"-"`.
 - **Plan = 0**: `variancePercent` is returned as `"-"` (division by zero avoided).
