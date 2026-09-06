@@ -14,7 +14,7 @@ export const createCategory = async (userId: string, name: string) => {
 
 export const listCategories = async (userId: string, page?: number, pageSize?: number) => {
   const categoriesQuery = Category.find({ userId })
-    .select({ _id: 0, name: 1, createdAt: 1, updatedAt: 1 })
+    .select({ _id: 1, name: 1, createdAt: 1, updatedAt: 1 })
     .sort({ name: 1 });
 
   if (page === undefined || pageSize === undefined) return categoriesQuery;
