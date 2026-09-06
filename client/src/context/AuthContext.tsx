@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import { apiRequest, ApiError } from '../api/client';
 
 interface AuthContextValue {
@@ -17,6 +17,18 @@ const EMAIL_KEY = 'pva_email';
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(STORAGE_KEY));
   const [email, setEmail] = useState<string | null>(() => localStorage.getItem(EMAIL_KEY));
+
+  const clearSession = useCallback(() => {
+    setToken(null);
+    setEmail(null);
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(EMAIL_KEY);
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('auth:unauthorized', clearSession);
+    return () => window.removeEventListener('auth:unauthorized', clearSession);
+  }, [clearSession]);
 
   const login = useCallback(async (emailInput: string, password: string) => {
     const res = await apiRequest<{ token: string }>('/auth/login', {
@@ -38,12 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await apiRequest('/auth/logout', { method: 'POST' });
     } finally {
-      setToken(null);
-      setEmail(null);
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(EMAIL_KEY);
+      clearSession();
     }
-  }, []);
+  }, [clearSession]);
 
   return (
     <AuthContext.Provider value={{ token, email, login, signup, logout }}>

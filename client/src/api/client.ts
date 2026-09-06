@@ -33,6 +33,9 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   const data = isJson ? await res.json() : null;
 
   if (!res.ok) {
+    if (res.status === 401 && typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('auth:unauthorized'));
+    }
     throw new ApiError(data?.error || `Request failed (${res.status})`, res.status);
   }
 
